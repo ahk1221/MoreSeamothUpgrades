@@ -15,7 +15,10 @@ namespace MoreSeamothUpgrades
     {
         public static TechType SeamothHullModule4;
         public static TechType SeamothHullModule5;
+        public static TechType SeamothThermalModule;
         public static TechType SeamothDrillModule;
+
+        public static AnimationCurve ExosuitThermalReactorCharge;
 
         public static void Patch()
         {
@@ -28,10 +31,18 @@ namespace MoreSeamothUpgrades
 
             #endregion
 
+            #region Extract From Exosuit
+
+            var exosuit = Resources.Load<GameObject>("WorldEntities/Tools/Exosuit").GetComponent<Exosuit>();
+            ExosuitThermalReactorCharge = exosuit.thermalReactorCharge;
+
+            #endregion
+
             #region Add TechTypes
 
             SeamothHullModule4 = TechTypePatcher.AddTechType("SeamothHullModule4", "Seamoth depth module MK4", "Enhances diving depth. Does not stack.");
             SeamothHullModule5 = TechTypePatcher.AddTechType("SeamothHullModule5", "Seamoth depth module MK5", "Enhances diving depth to maximum. Does not stack.");
+            SeamothThermalModule = TechTypePatcher.AddTechType("SeamothThermalModule", "Seamoth thermal reactor", "Recharges power cells in hot areas. Doesn't stack.");
             SeamothDrillModule = TechTypePatcher.AddTechType("SeamothDrillModule", "Seamoth drill module", "Allows the Seamoth to drill resource nodes like the PRAWN Drill Arm.");
 
             #endregion
@@ -64,11 +75,25 @@ namespace MoreSeamothUpgrades
                 _craftAmount = 1
             };
 
+            var seamothThermalModuleRecipe = new TechDataHelper()
+            {
+                _techType = SeamothThermalModule,
+                _craftAmount = 1,
+                _ingredients = new List<IngredientHelper>()
+                {
+                    new IngredientHelper(TechType.Kyanite, 1),
+                    new IngredientHelper(TechType.Polyaniline, 2),
+                    new IngredientHelper(TechType.WiringKit, 1)
+                }
+            };
+
             CraftDataPatcher.customTechData[SeamothHullModule4] = seamothHullModule4Recipe;
             CraftDataPatcher.customTechData[SeamothHullModule5] = seamothHullModule5Recipe;
+            CraftDataPatcher.customTechData[SeamothThermalModule] = seamothThermalModuleRecipe;
 
             CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothHullModule4, CraftTree.Type.Workbench, "SeamothMenu/SeamothHullModule4"));
             CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothHullModule5, CraftTree.Type.Workbench, "SeamothMenu/SeamothHullModule5"));
+            CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothThermalModule, CraftTree.Type.Workbench, "SeamothMenu/SeamothThermalModule"));
 
             #endregion
 
@@ -76,6 +101,7 @@ namespace MoreSeamothUpgrades
 
             CraftDataPatcher.customEquipmentTypes[SeamothHullModule4] = EquipmentType.SeamothModule;
             CraftDataPatcher.customEquipmentTypes[SeamothHullModule5] = EquipmentType.SeamothModule;
+            CraftDataPatcher.customEquipmentTypes[SeamothThermalModule] = EquipmentType.SeamothModule;
             CraftDataPatcher.customEquipmentTypes[SeamothDrillModule] = EquipmentType.SeamothModule;
 
             #endregion
@@ -94,15 +120,30 @@ namespace MoreSeamothUpgrades
                 SeamothHullModule5,
                 GetSeamothHullModuleV));
 
+            CustomPrefabHandler.customPrefabs.Add(new CustomPrefab(
+                "SeamothThermalModule",
+                "WorldEntities/Tools/SeamothThermalModule",
+                SeamothThermalModule,
+                GetSeamothThermalModule));
+
             #endregion
 
             #region Add Sprites
-            var sprite = SpriteManager.Get(TechType.VehicleHullModule3);
+            var depthSprite = SpriteManager.Get(TechType.VehicleHullModule3);
 
-            CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothHullModule4, sprite));
-            CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothHullModule5, sprite));
-            
+            CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothHullModule4, depthSprite));
+            CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothHullModule5, depthSprite));
+
+            var thermalReactorSprite = SpriteManager.Get(TechType.ExosuitThermalReactorModule);
+
+            CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothThermalModule, thermalReactorSprite));
+
             #endregion
+        }
+
+        public static GameObject GetSeamothThermalModule()
+        {
+            return GetSeamothUpgrade(SeamothThermalModule, "SeamothThermalModule");
         }
 
         public static GameObject GetSeamothHullModuleIV()

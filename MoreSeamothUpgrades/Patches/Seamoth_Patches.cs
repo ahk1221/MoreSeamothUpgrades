@@ -1,9 +1,29 @@
-﻿using System;
-using Harmony;
+﻿using Harmony;
+using System.Reflection;
 using System.Collections.Generic;
 
 namespace MoreSeamothUpgrades.Patches
 {
+    [HarmonyPatch(typeof(SeaMoth))]
+    [HarmonyPatch("Update")]
+    public class Seamoth_Update_Patch
+    {
+        static MethodInfo AddEnergyMethod = 
+            typeof(Vehicle).GetMethod("AddEnergy", BindingFlags.NonPublic | BindingFlags.Instance);
+
+        static void Prefix(SeaMoth __instance)
+        {
+            var count = __instance.modules.GetCount(Main.SeamothThermalModule);
+            if (count > 0)
+            {
+                var temperature = __instance.GetTemperature();
+                var energyToAdd = Main.ExosuitThermalReactorCharge.Evaluate(temperature);
+
+                AddEnergyMethod.Invoke(__instance, new object[] { energyToAdd * UnityEngine.Time.deltaTime });
+            }
+        }
+    }
+
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("OnUpgradeModuleChange")]
     public class Seamoth_OnUpgradeModuleChange_Patch
