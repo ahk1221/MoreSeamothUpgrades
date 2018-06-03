@@ -38,7 +38,7 @@ namespace MoreSeamothUpgrades.Patches
                 },
                 {
                     Main.SeamothHullModule4,
-                    1200f
+                    1100f
                 },
                 {
                     Main.SeamothHullModule5,
@@ -65,7 +65,4 @@ namespace MoreSeamothUpgrades.Patches
             __instance.crushDamage.SetExtraCrushDepth(depthUpgrade);
         }
     }
-
-    [HarmonyPatch(typeof(SeaMoth))]
-    [HarmonyPatch("OnUpgradeModuleUse")]
 }

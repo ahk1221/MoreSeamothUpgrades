@@ -36,6 +36,42 @@ namespace MoreSeamothUpgrades
 
             #endregion
 
+            #region Add Recipes
+
+            var seamothHullModule4Recipe = new TechDataHelper()
+            {
+                _techType = SeamothHullModule4,
+                _ingredients = new List<IngredientHelper>()
+                {
+                    new IngredientHelper(TechType.VehicleHullModule3, 1),
+                    new IngredientHelper(TechType.PlasteelIngot, 1),
+                    new IngredientHelper(TechType.Nickel, 2),
+                    new IngredientHelper(TechType.AluminumOxide, 3)
+                },
+                _craftAmount = 1
+            };
+
+            var seamothHullModule5Recipe = new TechDataHelper()
+            {
+                _techType = SeamothHullModule5,
+                _ingredients = new List<IngredientHelper>()
+                {
+                    new IngredientHelper(SeamothHullModule4, 1),
+                    new IngredientHelper(TechType.Titanium, 5),
+                    new IngredientHelper(TechType.Lithium, 2),
+                    new IngredientHelper(TechType.Kyanite, 3)
+                },
+                _craftAmount = 1
+            };
+
+            CraftDataPatcher.customTechData[SeamothHullModule4] = seamothHullModule4Recipe;
+            CraftDataPatcher.customTechData[SeamothHullModule5] = seamothHullModule5Recipe;
+
+            CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothHullModule4, CraftTree.Type.Workbench, "SeamothMenu/SeamothHullModule4"));
+            CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothHullModule5, CraftTree.Type.Workbench, "SeamothMenu/SeamothHullModule5"));
+
+            #endregion
+
             #region Equipment Types
 
             CraftDataPatcher.customEquipmentTypes[SeamothHullModule4] = EquipmentType.SeamothModule;
