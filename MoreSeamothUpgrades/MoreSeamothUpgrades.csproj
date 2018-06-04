@@ -55,7 +55,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DrillableInfo.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Patches\Drillable_Patches.cs" />
     <Compile Include="Patches\Seamoth_Patches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
