@@ -9,63 +9,68 @@ namespace MoreSeamothUpgrades.Patches
     [HarmonyPatch("OnHit")]
     public class ExosuitDrillArm_OnHit_Patch
     {
+        static float timeLastCall = 0;
+
         static void Prefix()
         {
-            ErrorMessage.AddDebug("OnHit called!!");
+            var timeSinceLastCall = Time.time - timeLastCall;
+
+            ErrorMessage.AddDebug("OnHit called!! Time last called: " + timeSinceLastCall);
+            timeLastCall = Time.time;
         }
     }
 
-    [HarmonyPatch(typeof(Vehicle))]
-    [HarmonyPatch("FixedUpdate")]
-    public class Vehicle_FixedUpdate_Patch
-    {
-        static void Prefix(Vehicle __instance)
-        {
-            if (!__instance.GetType().Equals(typeof(SeaMoth))) return;
+    //[HarmonyPatch(typeof(Vehicle))]
+    //[HarmonyPatch("FixedUpdate")]
+    //public class Vehicle_FixedUpdate_Patch
+    //{
+    //    static void Prefix(Vehicle __instance)
+    //    {
+    //        if (!__instance.GetType().Equals(typeof(SeaMoth))) return;
 
-            var seamoth = (SeaMoth)__instance;
-            var count = seamoth.modules.GetCount(Main.SeamothDrillModule);
+    //        var seamoth = (SeaMoth)__instance;
+    //        var count = seamoth.modules.GetCount(Main.SeamothDrillModule);
 
-            if (count <= 0) return;
+    //        if (count <= 0) return;
 
-            //if (!GameInput.GetButtonHeld(GameInput.Button.LeftHand) || Player.main.GetVehicle() != seamoth) return;
+    //        //if (!GameInput.GetButtonHeld(GameInput.Button.LeftHand) || Player.main.GetVehicle() != seamoth) return;
 
-            var pos = Vector3.zero;
-            var hitObj = default(GameObject);
+    //        var pos = Vector3.zero;
+    //        var hitObj = default(GameObject);
 
-            UWE.Utils.TraceFPSTargetPosition(seamoth.gameObject, 5f, ref hitObj, ref pos, true);
+    //        UWE.Utils.TraceFPSTargetPosition(seamoth.gameObject, 5f, ref hitObj, ref pos, true);
 
-            if (hitObj == null)
-            {
-                var component = Player.main.gameObject.GetComponent<InteractionVolumeUser>();
-                if (component != null && component.GetMostRecent() != null)
-                {
-                    hitObj = component.GetMostRecent().gameObject;
-                }
-            }
+    //        if (hitObj == null)
+    //        {
+    //            var component = Player.main.gameObject.GetComponent<InteractionVolumeUser>();
+    //            if (component != null && component.GetMostRecent() != null)
+    //            {
+    //                hitObj = component.GetMostRecent().gameObject;
+    //            }
+    //        }
 
-            if (hitObj == null) return;
+    //        if (hitObj == null) return;
 
-            var drillable = hitObj.FindAncestor<Drillable>();
+    //        var drillable = hitObj.FindAncestor<Drillable>();
 
-            if (drillable)
-            {
-                drillable.OnDrill(drillable.transform.position, null, out GameObject hitObject);
-                drillable.GetComponent<DrillableInfo>().drillingVehicle = seamoth;
-            }
-            else
-            {
-                LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();
-                if (liveMixin)
-                {
-                    bool flag = liveMixin.IsAlive();
-                    liveMixin.TakeDamage(4f, pos, DamageType.Drill, null);
-                }
+    //        if (drillable)
+    //        {
+    //            drillable.OnDrill(drillable.transform.position, null, out GameObject hitObject);
+    //            drillable.GetComponent<DrillableInfo>().drillingVehicle = seamoth;
+    //        }
+    //        else
+    //        {
+    //            LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();
+    //            if (liveMixin)
+    //            {
+    //                bool flag = liveMixin.IsAlive();
+    //                liveMixin.TakeDamage(4f, pos, DamageType.Drill, null);
+    //            }
 
-                hitObj.SendMessage("BashHit", seamoth, SendMessageOptions.DontRequireReceiver);
-            }
-        }
-    }
+    //            hitObj.SendMessage("BashHit", seamoth, SendMessageOptions.DontRequireReceiver);
+    //        }
+    //    }
+    //}
 
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("Update")]

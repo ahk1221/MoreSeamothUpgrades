@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using SMLHelper;
 using SMLHelper.Patchers;
 using Harmony;
+using MoreSeamothUpgrades.MonoBehaviours;
 
 namespace MoreSeamothUpgrades
 {
@@ -126,6 +123,12 @@ namespace MoreSeamothUpgrades
                 SeamothThermalModule,
                 GetSeamothThermalModule));
 
+            CustomPrefabHandler.customPrefabs.Add(new CustomPrefab(
+                "SeamothDrillModule",
+                "WorldEntities/Tools/SeamothDrillModule",
+                SeamothDrillModule,
+                GetSeamothDrillModule));
+
             #endregion
 
             #region Add Sprites
@@ -139,6 +142,11 @@ namespace MoreSeamothUpgrades
             CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothThermalModule, thermalReactorSprite));
 
             #endregion
+        }
+
+        public static GameObject GetSeamothDrillModule()
+        {
+            return GetSeamothUpgrade(SeamothDrillModule, "SeamothDrillModule").AddComponent<SeamothDrillModule>().gameObject;
         }
 
         public static GameObject GetSeamothThermalModule()
