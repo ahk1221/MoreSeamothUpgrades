@@ -4,41 +4,49 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 {
     public class SeamothDrillModule : MonoBehaviour
     {
+        public bool Toggle
+        {
+            get
+            {
+                return _toggle;
+            }
+            set
+            {
+                _toggle = value;
+                ErrorMessage.AddDebug("Toggle changed! " + _toggle);
+            }
+        }
+
+        private bool _toggle;
+
         private float timeNextDrill;
-
-        public FMOD_CustomLoopingEmitter loopHit;
-        public FMOD_CustomLoopingEmitter loop;
-
         public bool isDrilling;
-        public float timeToStartDrilling;
-
-        private bool firstFrame = false;
 
         void StopEffects()
         {
-            loop.Stop();
-            loopHit.Stop();
+            Main.DrillLoop.Stop();
+            Main.DrillLoopHit.Stop();
         }
 
         void Update()
         {
-            if(!firstFrame)
-            {
-                var exosuit = Resources.Load<GameObject>("WorldEntities/Tools/ExosuitDrillArmModule").GetComponent<ExosuitDrillArm>();
-                loopHit = exosuit.loopHit;
-                loop = exosuit.loop;
+            ErrorMessage.AddDebug(Toggle.ToString());
 
-                firstFrame = true;
-            }
+            var vehicle = Player.main.GetVehicle();
+            if (vehicle == null || !vehicle.GetType().Equals(typeof(SeaMoth))) return;
+            if (vehicle.modules.GetCount(Main.SeamothDrillModule) <= 0) return;
+            if (!vehicle.GetPilotingMode()) return;
+            if (Player.main.GetPDA().isOpen) return;
 
-            var seamoth = Player.main.GetVehicle();
-            if (seamoth == null || !seamoth.GetType().Equals(typeof(SeaMoth)) || Player.main.GetPDA().isOpen) return;
+            var seamoth = (SeaMoth)vehicle;
+
+            UpdateActiveTarget(seamoth);
 
             if(GameInput.GetButtonDown(GameInput.Button.LeftHand) && !isDrilling)
             {
                 isDrilling = true;
-                timeToStartDrilling = Time.time + 0.5f;
-                loop.Play();
+                timeNextDrill = Time.time + 0.5f;
+                Main.DrillLoop.Play();
             }
             
             if(GameInput.GetButtonUp(GameInput.Button.LeftHand))
@@ -47,11 +55,30 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 StopEffects();
             }
 
-            if(Time.time > timeNextDrill && isDrilling && Time.time > timeToStartDrilling)
+            if(Time.time > timeNextDrill && isDrilling)
             {
-                Drill((SeaMoth)seamoth);
+                Drill(seamoth);
                 timeNextDrill = Time.time + 0.12f;
             }
+        }
+
+        void UpdateActiveTarget(Vehicle vehicle)
+        {
+            var activeTarget = default(GameObject);
+            Targeting.GetTarget(vehicle.gameObject, 6f, out activeTarget, out float dist, null);
+
+            if (activeTarget)
+            {
+                var root = UWE.Utils.GetEntityRoot(activeTarget) ?? activeTarget;
+                if (root.GetComponentProfiled<Pickupable>() || root.GetComponentProfiled<Drillable>())
+                    activeTarget = root;
+                else
+                    root = null;
+            }
+
+            var guiHand = Player.main.GetComponent<GUIHand>();
+            if (activeTarget)
+                GUIHand.Send(activeTarget, HandTargetEventType.Hover, guiHand);
         }
 
         void Drill(SeaMoth moth)
@@ -64,12 +91,10 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             if (hitObj)
             {
                 var drillable = hitObj.FindAncestor<BetterDrillable>();
-                //loopHit.Play();
+                Main.DrillLoopHit.Play();
 
                 if (drillable)
-                {
                     drillable.OnDrill(transform.position, moth, out GameObject hitMesh);
-                }
                 else
                 {
                     LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();

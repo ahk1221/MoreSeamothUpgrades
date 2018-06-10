@@ -1,6 +1,12 @@
 ﻿using Harmony;
 using UnityEngine;
 using MoreSeamothUpgrades.MonoBehaviours;
+using System.Diagnostics;
+using System.Reflection;
+using System.Collections;
+using System.Collections.Generic;
+using System.Reflection.Emit;
+using System;
 
 namespace MoreSeamothUpgrades.Patches
 {

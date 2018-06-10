@@ -1,76 +1,45 @@
 ﻿using Harmony;
 using System.Reflection;
 using System.Collections.Generic;
+using MoreSeamothUpgrades.MonoBehaviours;
 using UnityEngine;
 
 namespace MoreSeamothUpgrades.Patches
 {
-    [HarmonyPatch(typeof(ExosuitDrillArm))]
-    [HarmonyPatch("OnHit")]
-    public class ExosuitDrillArm_OnHit_Patch
+    public class SeamothUtility
     {
-        static float timeLastCall = 0;
-
-        static void Prefix()
+        public static readonly string[] slotIDs = new string[]
         {
-            var timeSinceLastCall = Time.time - timeLastCall;
-
-            ErrorMessage.AddDebug("OnHit called!! Time last called: " + timeSinceLastCall);
-            timeLastCall = Time.time;
-        }
+            "SeamothModule1",
+            "SeamothModule2",
+            "SeamothModule3",
+            "SeamothModule4"
+        };
     }
 
-    //[HarmonyPatch(typeof(Vehicle))]
-    //[HarmonyPatch("FixedUpdate")]
-    //public class Vehicle_FixedUpdate_Patch
-    //{
-    //    static void Prefix(Vehicle __instance)
-    //    {
-    //        if (!__instance.GetType().Equals(typeof(SeaMoth))) return;
+    [HarmonyPatch(typeof(SeaMoth))]
+    [HarmonyPatch("OnUpgradeModuleToggle")]
+    public class Seamoth_OnUpgradeModuleToggle_Patch
+    {
+        static void Postfix(SeaMoth __instance, int slotID, bool active)
+        {
+            var techType = __instance.modules.GetTechTypeInSlot(SeamothUtility.slotIDs[slotID]);
+            if(techType == Main.SeamothDrillModule)
+            {
+                ErrorMessage.AddDebug("Found DrillModule");
 
-    //        var seamoth = (SeaMoth)__instance;
-    //        var count = seamoth.modules.GetCount(Main.SeamothDrillModule);
+                var inventoryItem = __instance.modules.GetItemInSlot(SeamothUtility.slotIDs[slotID]);
+                var pickupable = inventoryItem.item;
+                var seamothDrillModule = pickupable.GetComponent<SeamothDrillModule>();
 
-    //        if (count <= 0) return;
-
-    //        //if (!GameInput.GetButtonHeld(GameInput.Button.LeftHand) || Player.main.GetVehicle() != seamoth) return;
-
-    //        var pos = Vector3.zero;
-    //        var hitObj = default(GameObject);
-
-    //        UWE.Utils.TraceFPSTargetPosition(seamoth.gameObject, 5f, ref hitObj, ref pos, true);
-
-    //        if (hitObj == null)
-    //        {
-    //            var component = Player.main.gameObject.GetComponent<InteractionVolumeUser>();
-    //            if (component != null && component.GetMostRecent() != null)
-    //            {
-    //                hitObj = component.GetMostRecent().gameObject;
-    //            }
-    //        }
-
-    //        if (hitObj == null) return;
-
-    //        var drillable = hitObj.FindAncestor<Drillable>();
-
-    //        if (drillable)
-    //        {
-    //            drillable.OnDrill(drillable.transform.position, null, out GameObject hitObject);
-    //            drillable.GetComponent<DrillableInfo>().drillingVehicle = seamoth;
-    //        }
-    //        else
-    //        {
-    //            LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();
-    //            if (liveMixin)
-    //            {
-    //                bool flag = liveMixin.IsAlive();
-    //                liveMixin.TakeDamage(4f, pos, DamageType.Drill, null);
-    //            }
-
-    //            hitObj.SendMessage("BashHit", seamoth, SendMessageOptions.DontRequireReceiver);
-    //        }
-    //    }
-    //}
+                if(seamothDrillModule != null)
+                {
+                    ErrorMessage.AddDebug("Found DrillModule component");
+                    seamothDrillModule.Toggle = active;
+                }
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("Update")]
@@ -95,15 +64,7 @@ namespace MoreSeamothUpgrades.Patches
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("OnUpgradeModuleChange")]
     public class Seamoth_OnUpgradeModuleChange_Patch
-    {
-        static readonly string[] _slotIDs = new string[]
-        {
-            "SeamothModule1",
-            "SeamothModule2",
-            "SeamothModule3",
-            "SeamothModule4"
-        };
-
+    { 
         static void Postfix(SeaMoth __instance, TechType techType)
         {
             var dictionary = new Dictionary<TechType, float>
@@ -135,9 +96,9 @@ namespace MoreSeamothUpgrades.Patches
             };
 
             var depthUpgrade = 0f;
-            for (int i = 0; i < _slotIDs.Length; i++)
+            for (int i = 0; i < SeamothUtility.slotIDs.Length; i++)
             {
-                var slot = _slotIDs[i];
+                var slot = SeamothUtility.slotIDs[i];
                 var techTypeInSlot = __instance.modules.GetTechTypeInSlot(slot);
 
                 if (dictionary.ContainsKey(techTypeInSlot))

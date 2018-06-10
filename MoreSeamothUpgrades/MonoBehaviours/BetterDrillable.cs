@@ -103,7 +103,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             var vehicle = Player.main.GetVehicle();
 
             var canDrill = false;
-            var hand = HandReticle.Hand.Right;
+            var hand = HandReticle.Hand.Left;
 
             if (!vehicle)
                 canDrill = false;
@@ -117,15 +117,19 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                     hand = (exosuit.leftArmType == TechType.ExosuitDrillArmModule) ? HandReticle.Hand.Left : HandReticle.Hand.Right;
                 }
             }
-            else
+            else if(vehicle.GetType().Equals(typeof(SeaMoth)))
             {
                 var seamoth = (SeaMoth)vehicle;
                 if (seamoth.modules.GetCount(Main.SeamothDrillModule) > 0)
                 {
                     canDrill = true;
-                    hand = HandReticle.Hand.Right;
+                    hand = HandReticle.Hand.Left;
                 }
             }
+
+            Console.WriteLine("CanDrill: " + canDrill);
+            Console.WriteLine("Hand: " + hand);
+            Console.WriteLine("Vehicle: " + vehicle?.ToString());
 
             if (canDrill)
             {
