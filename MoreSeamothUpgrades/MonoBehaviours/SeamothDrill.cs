@@ -1,26 +1,16 @@
 ﻿using UnityEngine;
+using MoreSeamothUpgrades.Patches;
 
 namespace MoreSeamothUpgrades.MonoBehaviours
 {
-    public class SeamothDrillModule : MonoBehaviour
+    public class SeamothDrill : MonoBehaviour
     {
-        public bool Toggle
-        {
-            get
-            {
-                return _toggle;
-            }
-            set
-            {
-                _toggle = value;
-                ErrorMessage.AddDebug("Toggle changed! " + _toggle);
-            }
-        }
-
-        private bool _toggle;
+        public bool toggle;
 
         private float timeNextDrill;
         public bool isDrilling;
+
+        private SeaMoth seamoth;
 
         void StopEffects()
         {
@@ -28,17 +18,18 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             Main.DrillLoopHit.Stop();
         }
 
+        void Start()
+        {
+            seamoth = GetComponent<SeaMoth>();
+        }
+
         void Update()
         {
-            ErrorMessage.AddDebug(Toggle.ToString());
+            if (!toggle) return;
 
-            var vehicle = Player.main.GetVehicle();
-            if (vehicle == null || !vehicle.GetType().Equals(typeof(SeaMoth))) return;
-            if (vehicle.modules.GetCount(Main.SeamothDrillModule) <= 0) return;
-            if (!vehicle.GetPilotingMode()) return;
+            if (seamoth.modules.GetCount(Main.SeamothDrillModule) <= 0) return;
+            if (!seamoth.GetPilotingMode()) return;
             if (Player.main.GetPDA().isOpen) return;
-
-            var seamoth = (SeaMoth)vehicle;
 
             UpdateActiveTarget(seamoth);
 
@@ -70,7 +61,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             if (activeTarget)
             {
                 var root = UWE.Utils.GetEntityRoot(activeTarget) ?? activeTarget;
-                if (root.GetComponentProfiled<Pickupable>() || root.GetComponentProfiled<Drillable>())
+                if (root.GetComponentProfiled<Drillable>())
                     activeTarget = root;
                 else
                     root = null;
@@ -78,7 +69,9 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
             var guiHand = Player.main.GetComponent<GUIHand>();
             if (activeTarget)
+            {
                 GUIHand.Send(activeTarget, HandTargetEventType.Hover, guiHand);
+            }
         }
 
         void Drill(SeaMoth moth)
@@ -86,7 +79,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             var pos = Vector3.zero;
             var hitObj = default(GameObject);
 
-            UWE.Utils.TraceFPSTargetPosition(moth.gameObject, 5f, ref hitObj, ref pos, true);
+            UWE.Utils.TraceFPSTargetPosition(moth.gameObject, 6f, ref hitObj, ref pos, true);
 
             if (hitObj)
             {
@@ -94,7 +87,9 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 Main.DrillLoopHit.Play();
 
                 if (drillable)
+                {
                     drillable.OnDrill(transform.position, moth, out GameObject hitMesh);
+                }
                 else
                 {
                     LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();
@@ -107,7 +102,9 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 }
             }
             else
+            {
                 StopEffects();
+            }
         }
     }
 }

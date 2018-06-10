@@ -192,7 +192,7 @@ namespace MoreSeamothUpgrades
 
         public static GameObject GetSeamothDrillModule()
         {
-            return GetSeamothUpgrade(SeamothDrillModule, "SeamothDrillModule").AddComponent<SeamothDrillModule>().gameObject;
+            return GetSeamothUpgrade(SeamothDrillModule, "SeamothDrillModule").AddComponent<SeamothDrill>().gameObject;
         }
 
         public static GameObject GetSeamothThermalModule()

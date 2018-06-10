@@ -13,6 +13,7 @@ namespace MoreSeamothUpgrades.Patches
     {
         static void Postfix(AnteChamber __instance)
         {
+            // Remove the event handler and add our own.
             __instance.drillable.onDrilled -= __instance.OnDrilled;
             __instance.drillable.GetComponent<BetterDrillable>().onDrilled += __instance.OnDrilled;
         }

@@ -7,6 +7,12 @@ using UnityEngine;
 
 namespace MoreSeamothUpgrades.MonoBehaviours
 {
+    /* Just ignore this class
+     * This is a complete copy-paste of the Drillable class using dnSpy.
+     * I did this so that I could have complete control over the Drillable component without using Reflectin
+     * I know this is a very messy class, but it doesn't really matter
+     * - AHK1221
+     */
     public class BetterDrillable : MonoBehaviour
     {
         public Drillable drillable;

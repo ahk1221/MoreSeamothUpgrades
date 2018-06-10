@@ -28,16 +28,24 @@ namespace MoreSeamothUpgrades.Patches
             {
                 ErrorMessage.AddDebug("Found DrillModule");
 
-                var inventoryItem = __instance.modules.GetItemInSlot(SeamothUtility.slotIDs[slotID]);
-                var pickupable = inventoryItem.item;
-                var seamothDrillModule = pickupable.GetComponent<SeamothDrillModule>();
+                var seamothDrillModule = __instance.GetComponent<SeamothDrill>();
 
                 if(seamothDrillModule != null)
                 {
                     ErrorMessage.AddDebug("Found DrillModule component");
-                    seamothDrillModule.Toggle = active;
+                    seamothDrillModule.toggle = active;
                 }
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(SeaMoth))]
+    [HarmonyPatch("Start")]
+    public class Seamoth_Start_Patch
+    {
+        static void Prefix(SeaMoth __instance)
+        {
+            __instance.gameObject.AddComponent<SeamothDrill>();
         }
     }
 

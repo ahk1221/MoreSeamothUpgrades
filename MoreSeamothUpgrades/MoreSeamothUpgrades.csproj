@@ -59,7 +59,7 @@
     <Compile Include="DrillableInfo.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="MonoBehaviours\BetterDrillable.cs" />
-    <Compile Include="MonoBehaviours\SeamothDrillModule.cs" />
+    <Compile Include="MonoBehaviours\SeamothDrill.cs" />
     <Compile Include="Patches\AnteChamber_Patches.cs" />
     <Compile Include="Patches\Drillable_Patches.cs" />
     <Compile Include="Patches\Seamoth_Patches.cs" />
