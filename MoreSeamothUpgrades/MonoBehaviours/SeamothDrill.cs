@@ -14,40 +14,53 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
         void StopEffects()
         {
+            // Stop sounds.
             Main.DrillLoop.Stop();
             Main.DrillLoopHit.Stop();
         }
 
         void Start()
         {
+            // Get Seamoth component on the current GameObject.
             seamoth = GetComponent<SeaMoth>();
         }
 
         void Update()
         {
+            // If its not selected, we don't want to run the rest of the function
             if (!toggle) return;
 
+            // Some checks to see if we can drill or not.
             if (seamoth.modules.GetCount(Main.SeamothDrillModule) <= 0) return;
             if (!seamoth.GetPilotingMode()) return;
             if (Player.main.GetPDA().isOpen) return;
 
+            // Update hovering.
             UpdateActiveTarget(seamoth);
 
+            // If we're pressing the Left Mouse Button and we're not drilling
             if(GameInput.GetButtonDown(GameInput.Button.LeftHand) && !isDrilling)
             {
+                // We're now set to drilling, and the drill will start 0.5 seconds from now
                 isDrilling = true;
                 timeNextDrill = Time.time + 0.5f;
+
+                // Start the sound.
                 Main.DrillLoop.Play();
             }
             
+            // If we let up the Left Mouse Button
             if(GameInput.GetButtonUp(GameInput.Button.LeftHand))
             {
+                // We're no longer drilling and sounds have stopped.
                 isDrilling = false;
                 StopEffects();
             }
 
+            // If we can drill
             if(Time.time > timeNextDrill && isDrilling)
             {
+                // Drill!
                 Drill(seamoth);
                 timeNextDrill = Time.time + 0.12f;
             }
@@ -55,11 +68,14 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
         void UpdateActiveTarget(Vehicle vehicle)
         {
+            // Get the GameObject we're looking at
             var activeTarget = default(GameObject);
             Targeting.GetTarget(vehicle.gameObject, 6f, out activeTarget, out float dist, null);
 
-            if (activeTarget)
+            // Check if not null
+            if (activeTarget != null)
             {
+                // Get the root object, or the hit object if root is null
                 var root = UWE.Utils.GetEntityRoot(activeTarget) ?? activeTarget;
                 if (root.GetComponentProfiled<Drillable>())
                     activeTarget = root;
@@ -67,9 +83,11 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                     root = null;
             }
 
+            // Get the GUIHand component
             var guiHand = Player.main.GetComponent<GUIHand>();
             if (activeTarget)
             {
+                // Send the Hover message to the GameObject we're looking at.
                 GUIHand.Send(activeTarget, HandTargetEventType.Hover, guiHand);
             }
         }
@@ -79,30 +97,39 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             var pos = Vector3.zero;
             var hitObj = default(GameObject);
 
+            // Get the GameObject we're looking at
             UWE.Utils.TraceFPSTargetPosition(moth.gameObject, 6f, ref hitObj, ref pos, true);
 
+            // Check if not null
             if (hitObj)
             {
+                // Find the BetterDrillable component and play sounds.
                 var drillable = hitObj.FindAncestor<BetterDrillable>();
                 Main.DrillLoopHit.Play();
 
+                // If we found the drillable
                 if (drillable)
                 {
+                    // Send the "drill" message to the Drillable
                     drillable.OnDrill(transform.position, moth, out GameObject hitMesh);
                 }
-                else
+                else // Otherwise if we did not hit any object
                 {
+                    // Get the LiveMixin component in the found GameObject
                     LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();
-                    if (liveMixin)
+                    if (liveMixin) // If not null
                     {
+                        // Make it take a bit of damage
                         liveMixin.TakeDamage(4f, pos, DamageType.Drill, null);
                     }
 
+                    // Also send a "hit" message.
                     hitObj.SendMessage("BashHit", this, SendMessageOptions.DontRequireReceiver);
                 }
             }
-            else
+            else // If its null
             {
+                // Stop all sounds
                 StopEffects();
             }
         }

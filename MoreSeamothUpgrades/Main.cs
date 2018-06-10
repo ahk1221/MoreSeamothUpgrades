@@ -212,13 +212,16 @@ namespace MoreSeamothUpgrades
 
         public static GameObject GetSeamothUpgrade(TechType techType, string classId)
         {
+            // Get the ElectricalDefense module prefab and instantiate it
             var path = "WorldEntities/Tools/SeamothElectricalDefense";
             var prefab = Resources.Load<GameObject>(path);
             var obj = GameObject.Instantiate(prefab);
 
+            // Get the TechTags and PrefabIdentifiers
             var techTag = obj.GetComponent<TechTag>();
             var prefabIdentifier = obj.GetComponent<PrefabIdentifier>();
 
+            // Change them so they fit to our requirements.
             techTag.type = techType;
             prefabIdentifier.ClassId = classId;
 

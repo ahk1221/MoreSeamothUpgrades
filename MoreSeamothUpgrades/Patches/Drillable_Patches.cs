@@ -16,9 +16,11 @@ namespace MoreSeamothUpgrades.Patches
     {
         static void Prefix(Drillable __instance)
         {
+            // Add BetterDrillable component to the Drillable GameObject
             var betterDrillable = __instance.gameObject.AddComponent<BetterDrillable>();
             betterDrillable.drillable = __instance;
 
+            // Set the fields
             betterDrillable.resources = __instance.resources;
             betterDrillable.breakFX = __instance.breakFX;
             betterDrillable.breakAllFX = __instance.breakAllFX;
@@ -39,9 +41,11 @@ namespace MoreSeamothUpgrades.Patches
     {
         static bool Prefix(Drillable __instance, Vector3 position, Exosuit exo, out GameObject hitObject)
         {
+            // Call the BetterDrillable.OnDrill function
             var betterDrillable = __instance.GetComponent<BetterDrillable>();
             betterDrillable.OnDrill(position, exo, out hitObject);
 
+            // Return out of original method
             return false;
         }
     }
@@ -52,9 +56,11 @@ namespace MoreSeamothUpgrades.Patches
     {
         static bool Prefix(Drillable __instance)
         {
+            // Call the BetterDrillable.HoverDrillable function
             var betterDrillable = __instance.GetComponent<BetterDrillable>();
             betterDrillable.HoverDrillable();
 
+            // Return out of original method.
             return false;
         }
     }
@@ -65,9 +71,11 @@ namespace MoreSeamothUpgrades.Patches
     {
         static bool Prefix(Drillable __instance)
         {
+            // Call the BetterDrillable.Restore method
             var betterDrillable = __instance.GetComponent<BetterDrillable>();
             betterDrillable.Restore();
 
+            // Return out of original method.
             return false;
         }
     }
@@ -78,9 +86,11 @@ namespace MoreSeamothUpgrades.Patches
     {
         static bool Prefix(Drillable __instance)
         {
+            // Call the BetterDrillable.ManagedUpdate method
             var betterDrillable = __instance.GetComponent<BetterDrillable>();
             betterDrillable.ManagedUpdate();
 
+            // Return out of original method.
             return false;
         }
     }
