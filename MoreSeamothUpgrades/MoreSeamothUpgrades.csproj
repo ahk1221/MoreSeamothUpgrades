@@ -47,9 +47,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="UnityEngine">
       <HintPath>D:\Steam Library\steamapps\common\Subnautica\Subnautica_Data\Managed\UnityEngine.dll</HintPath>
@@ -57,6 +55,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
+    <Compile Include="Modules\DepthModules\SeamothHullModule5.cs" />
+    <Compile Include="Modules\DepthModules\SeamothHullModule4.cs" />
+    <Compile Include="Modules\SeamothDrillModule.cs" />
+    <Compile Include="Modules\SeamothModule.cs" />
+    <Compile Include="Modules\SeamothThermalModule.cs" />
     <Compile Include="MonoBehaviours\BetterDrillable.cs" />
     <Compile Include="MonoBehaviours\SeamothDrill.cs" />
     <Compile Include="Patches\AnteChamber_Patches.cs" />

@@ -28,7 +28,7 @@ namespace MoreSeamothUpgrades.Patches
             var techType = __instance.modules.GetTechTypeInSlot(SeamothUtility.slotIDs[slotID]);
 
             // If its the SeamothDrillModule
-            if (techType == Main.SeamothDrillModule)
+            if (techType == SeamothModule.SeamothDrillModule)
             { 
                 // Get the SeamothDrill component from the SeaMoth object.
                 var seamothDrillModule = __instance.GetComponent<SeamothDrill>();
@@ -75,7 +75,7 @@ namespace MoreSeamothUpgrades.Patches
         static void Prefix(SeaMoth __instance)
         {
             // If we have the SeamothThermalModule equipped.
-            var count = __instance.modules.GetCount(Main.SeamothThermalModule);
+            var count = __instance.modules.GetCount(SeamothModule.SeamothThermalModule);
             if (count > 0)
             {
                 // Evaluate the energy to add based on temperature
@@ -83,7 +83,7 @@ namespace MoreSeamothUpgrades.Patches
                 var energyToAdd = Main.ExosuitThermalReactorCharge.Evaluate(temperature);
 
                 // Add the energy by invoking private method using Reflection.
-                AddEnergyMethod.Invoke(__instance, new object[] { energyToAdd * UnityEngine.Time.deltaTime });
+                AddEnergyMethod.Invoke(__instance, new object[] { energyToAdd * Time.deltaTime });
             }
         }
     }
@@ -114,11 +114,11 @@ namespace MoreSeamothUpgrades.Patches
                     700f
                 },
                 {
-                    Main.SeamothHullModule4,
+                    SeamothModule.SeamothHullModule4,
                     1100f
                 },
                 {
-                    Main.SeamothHullModule5,
+                    SeamothModule.SeamothHullModule5,
                     1500f
                 }
             };

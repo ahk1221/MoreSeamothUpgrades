@@ -126,7 +126,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             else if(vehicle.GetType().Equals(typeof(SeaMoth)))
             {
                 var seamoth = (SeaMoth)vehicle;
-                if (seamoth.modules.GetCount(Main.SeamothDrillModule) > 0)
+                if (seamoth.modules.GetCount(SeamothModule.SeamothDrillModule) > 0)
                 {
                     canDrill = true;
                     hand = HandReticle.Hand.Left;
