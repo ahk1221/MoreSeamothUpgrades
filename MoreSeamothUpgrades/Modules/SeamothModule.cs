@@ -34,13 +34,13 @@ namespace MoreSeamothUpgrades
             StepsToTab = stepsToTab;
             Sprite = sprite;
 
-            TechType = TechTypeHandler.AddTechType(ID, DisplayName, Tooltip, RequiredForUnlock == TechType.None);
-
             Patch();
         }
 
         public void Patch()
         {
+            TechType = TechTypeHandler.AddTechType(ID, DisplayName, Tooltip, RequiredForUnlock == TechType.None);
+
             if (RequiredForUnlock != TechType.None)
                 KnownTechHandler.SetAnalysisTechEntry(RequiredForUnlock, new TechType[] { TechType });
 
