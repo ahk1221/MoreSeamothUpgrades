@@ -5,7 +5,15 @@ namespace MoreSeamothUpgrades.Modules
 {
     public class SeamothHullModule5 : SeamothModule
     {
-        public SeamothHullModule5() : base("SeamothHullModule5", "Seamoth depth module MK5", "Enhances diving depth to maximum. Does not stack.", CraftTree.Type.Workbench, new string[1] { "SeamothMenu" }, SeamothHullModule4, SpriteManager.Get(TechType.VehicleHullModule3))
+        public SeamothHullModule5() : 
+            base("SeamothHullModule5", 
+                "Seamoth depth module MK5", 
+                "Enhances diving depth to maximum. Does not stack.", 
+                CraftTree.Type.Workbench, 
+                new string[1] { "SeamothMenu" }, 
+                SeamothHullModule4, 
+                SeamothHullModule4,
+                SpriteManager.Get(TechType.VehicleHullModule3))
         {
             SeamothHullModule5 = TechType;
         }

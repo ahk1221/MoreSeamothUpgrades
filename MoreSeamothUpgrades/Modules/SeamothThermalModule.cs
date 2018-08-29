@@ -5,7 +5,15 @@ namespace MoreSeamothUpgrades.Modules
 {
     public class SeamothThermalModule : SeamothModule
     {
-        public SeamothThermalModule() : base("SeamothThermalModule", "Seamoth thermal reactor", "Recharges power cells in hot areas. Doesn't stack.", CraftTree.Type.SeamothUpgrades, new string[1] { "SeamothModules" }, TechType.ExosuitThermalReactorModule, SpriteManager.Get(TechType.ExosuitThermalReactorModule))
+        public SeamothThermalModule() : 
+            base("SeamothThermalModule", 
+                "Seamoth thermal reactor", 
+                "Recharges power cells in hot areas. Doesn't stack.", 
+                CraftTree.Type.SeamothUpgrades, 
+                new string[1] { "SeamothModules" }, 
+                TechType.ExosuitThermalReactorModule, 
+                TechType.ExosuitThermalReactorModule, 
+                SpriteManager.Get(TechType.ExosuitThermalReactorModule))
         {
             SeamothThermalModule = TechType;
         }

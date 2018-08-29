@@ -23,8 +23,9 @@ namespace MoreSeamothUpgrades
         public readonly CraftTree.Type Fabricator;
         public readonly string[] StepsToTab;
         public readonly Atlas.Sprite Sprite;
+        public readonly TechType AddAfter;
 
-        protected SeamothModule(string id, string displayName, string tooltip, CraftTree.Type fabricator, string[] stepsToTab, TechType requiredToUnlock = TechType.None, Atlas.Sprite sprite = null) : base(id, $"WorldEntities/Tools/{id}", TechType.None)
+        protected SeamothModule(string id, string displayName, string tooltip, CraftTree.Type fabricator, string[] stepsToTab, TechType requiredToUnlock = TechType.None, TechType addAfter = TechType.None, Atlas.Sprite sprite = null) : base(id, $"WorldEntities/Tools/{id}", TechType.None)
         {
             ID = id;
             DisplayName = displayName;
@@ -33,6 +34,7 @@ namespace MoreSeamothUpgrades
             RequiredForUnlock = requiredToUnlock;
             StepsToTab = stepsToTab;
             Sprite = sprite;
+            AddAfter = addAfter;
 
             Patch();
         }
@@ -48,6 +50,17 @@ namespace MoreSeamothUpgrades
                 SpriteHandler.RegisterSprite(TechType, $"./QMods/MoreSeamothUpgrades/Assets/{ID}.png");
             else
                 SpriteHandler.RegisterSprite(TechType, Sprite);
+
+            switch(Fabricator)
+            {
+                case CraftTree.Type.Workbench:
+                    CraftDataHandler.AddToGroup(TechGroup.Workbench, TechCategory.Workbench, TechType, AddAfter);
+                    break;
+
+                case CraftTree.Type.SeamothUpgrades:
+                    CraftDataHandler.AddToGroup(TechGroup.VehicleUpgrades, TechCategory.VehicleUpgrades, TechType, AddAfter);
+                    break;
+            }
 
             CraftDataHandler.SetEquipmentType(TechType, EquipmentType.SeamothModule);
             CraftDataHandler.SetTechData(TechType, GetTechData());

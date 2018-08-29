@@ -6,18 +6,6 @@ using UnityEngine;
 
 namespace MoreSeamothUpgrades.Patches
 {
-    public class SeamothUtility
-    {
-        // Copy-paste of SeaMoth._slotIDs.
-        public static readonly string[] slotIDs = new string[]
-        {
-            "SeamothModule1",
-            "SeamothModule2",
-            "SeamothModule3",
-            "SeamothModule4"
-        };
-    }
-
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("OnUpgradeModuleToggle")]
     public class Seamoth_OnUpgradeModuleToggle_Patch
@@ -25,7 +13,9 @@ namespace MoreSeamothUpgrades.Patches
         static void Postfix(SeaMoth __instance, int slotID, bool active)
         {
             // Find the TechType in the toggled slot.
-            var techType = __instance.modules.GetTechTypeInSlot(SeamothUtility.slotIDs[slotID]);
+            // Valid inputs would be along the lines of: SeamothModule1, SeamothModule2, etc
+            // slotID is 0-based, so an addition of 1 is required.
+            var techType = __instance.modules.GetTechTypeInSlot($"SeamothModule{slotID + 1}");
 
             // If its the SeamothDrillModule
             if (techType == SeamothModule.SeamothDrillModule)
@@ -126,24 +116,20 @@ namespace MoreSeamothUpgrades.Patches
             // Depth upgrade to add.
             var depthUpgrade = 0f;
 
-            // Loop through all slots.
-            for (int i = 0; i < SeamothUtility.slotIDs.Length; i++)
+            // Loop through available depth module upgrades
+            foreach (var entry in dictionary)
             {
-                // Get the slot and the TechType
-                var slot = SeamothUtility.slotIDs[i];
-                var techTypeInSlot = __instance.modules.GetTechTypeInSlot(slot);
+                TechType depthTechType = entry.Key;
+                float depthAddition = entry.Value;
 
-                // If its one of the depth modules
-                if (dictionary.ContainsKey(techTypeInSlot))
+                int count = __instance.modules.GetCount(depthTechType);
+
+                // If you have at least 1 such depth module
+                if(count > 0)
                 {
-                    // Get the depth upgrade for that TechType
-                    var currentIteration = dictionary[techTypeInSlot];
-
-                    // If the upgrade is more than the one currently selected
-                    if (currentIteration > depthUpgrade)
+                    if(depthAddition > depthUpgrade)
                     {
-                        // Select this one!
-                        depthUpgrade = currentIteration;
+                        depthUpgrade = depthAddition;
                     }
                 }
             }

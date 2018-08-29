@@ -6,7 +6,14 @@ namespace MoreSeamothUpgrades.Modules
 {
     public class SeamothDrillModule : SeamothModule
     {
-        public SeamothDrillModule() : base("SeamothDrillModule", "Seamoth drill module", "Enables the Seamoth to mine resources like the PRAWN Drill Arm.", CraftTree.Type.SeamothUpgrades, new string[1] { "SeamothModules" }, TechType.ExosuitDrillArmModule)
+        public SeamothDrillModule() : 
+            base("SeamothDrillModule", 
+                "Seamoth drill module", 
+                "Enables the Seamoth to mine resources like the PRAWN Drill Arm.",
+                CraftTree.Type.SeamothUpgrades, 
+                new string[1] { "SeamothModules" }, 
+                TechType.ExosuitDrillArmModule, 
+                TechType.ExosuitDrillArmModule)
         {
             SeamothDrillModule = TechType;
 
