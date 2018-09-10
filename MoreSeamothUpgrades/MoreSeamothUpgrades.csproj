@@ -57,10 +57,12 @@
     <Compile Include="Main.cs" />
     <Compile Include="Modules\DepthModules\SeamothHullModule5.cs" />
     <Compile Include="Modules\DepthModules\SeamothHullModule4.cs" />
+    <Compile Include="Modules\SeamothClawModule.cs" />
     <Compile Include="Modules\SeamothDrillModule.cs" />
     <Compile Include="Modules\SeamothModule.cs" />
     <Compile Include="Modules\SeamothThermalModule.cs" />
     <Compile Include="MonoBehaviours\BetterDrillable.cs" />
+    <Compile Include="MonoBehaviours\SeamothClaw.cs" />
     <Compile Include="MonoBehaviours\SeamothDrill.cs" />
     <Compile Include="Patches\AnteChamber_Patches.cs" />
     <Compile Include="Patches\Drillable_Patches.cs" />
