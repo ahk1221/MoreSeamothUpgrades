@@ -28,9 +28,6 @@ namespace MoreSeamothUpgrades
                 var exosuit = Resources.Load<GameObject>("WorldEntities/Tools/Exosuit").GetComponent<Exosuit>();
                 ExosuitThermalReactorCharge = exosuit.thermalReactorCharge;
 
-                var exosuitClawArmGO = (GameObject)GetArmPrefabMethod.Invoke(exosuit, new object[] { TechType.ExosuitClawArmModule });
-                var exosuitClawArm = exosuitClawArmGO.GetComponent<ExosuitClawArm>();
-
                 var exosuitDrillArmGO = (GameObject)GetArmPrefabMethod.Invoke(exosuit, new object[] { TechType.ExosuitDrillArmModule });
                 var exosuitDrillArm = exosuitDrillArmGO.GetComponent<ExosuitDrillArm>();
                 DrillLoopHit = exosuitDrillArm.loopHit;
