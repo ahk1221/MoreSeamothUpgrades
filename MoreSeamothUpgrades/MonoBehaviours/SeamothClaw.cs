@@ -5,19 +5,22 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 {
     public class SeamothClaw : MonoBehaviour
     {
-        public bool toggle;
+        private float cooldownTime;
+        private float timeUsed = float.NegativeInfinity;
+
+        private SeaMoth seamoth;
 
         private bool TryUse(out float cooldownDuration)
         {
             if (Time.time - this.timeUsed >= this.cooldownTime)
             {
-                Seamoth componentInParent = base.GetComponentInParent<Seamoth>();
+                seamoth = base.GetComponentInParent<SeaMoth>();
                 Pickupable pickupable = null;
                 PickPrefab x = null;
-                if (componentInParent.GetActiveTarget())
+                if (GetActiveTarget(seamoth))
                 {
-                    pickupable = componentInParent.GetActiveTarget().GetComponent<Pickupable>();
-                    x = componentInParent.GetActiveTarget().GetComponent<PickPrefab>();
+                    pickupable = GetActiveTarget(seamoth).GetComponent<Pickupable>();
+                    x = GetActiveTarget(seamoth).GetComponent<PickPrefab>();
                 }
                 if (pickupable != null && pickupable.isPickupable)
                 {
@@ -54,11 +57,11 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
         public void OnPickup()
         {
-            Seamoth componentInParent = base.GetComponentInParent<Exosuit>();
-            if (componentInParent.GetActiveTarget())
+            seamoth = base.GetComponentInParent<SeaMoth>();
+            if (GetActiveTarget(seamoth))
             {
-                Pickupable pickupable = componentInParent.GetActiveTarget().GetComponent<Pickupable>();
-                PickPrefab component = componentInParent.GetActiveTarget().GetComponent<PickPrefab>();
+                Pickupable pickupable = GetActiveTarget(seamoth).GetComponent<Pickupable>();
+                PickPrefab component = GetActiveTarget(seamoth).GetComponent<PickPrefab>();
                 if (pickupable != null && pickupable.isPickupable && componentInParent.storageContainer.container.HasRoomFor(pickupable))
                 {
                     pickupable = pickupable.Initialize();
@@ -75,12 +78,12 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
         public void OnHit()
         {
-            Seamoth componentInParent = base.GetComponentInParent<Exosuit>();
-            if (componentInParent.CanPilot() && componentInParent.GetPilotingMode())
+            seamoth = base.GetComponentInParent<SeaMoth>();
+            if (seamoth.CanPilot() && seamoth.GetPilotingMode())
             {
                 Vector3 position = default(Vector3);
                 GameObject gameObject = null;
-                UWE.Utils.TraceFPSTargetPosition(componentInParent.gameObject, 6.5f, ref gameObject, ref position, true);
+                UWE.Utils.TraceFPSTargetPosition(seamoth.gameObject, 6.5f, ref gameObject, ref position, true);
                 if (gameObject == null)
                 {
                     InteractionVolumeUser component = Player.main.gameObject.GetComponent<InteractionVolumeUser>();
@@ -108,6 +111,34 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                     gameObject.SendMessage("BashHit", this, SendMessageOptions.DontRequireReceiver);
                 }
             }
+        }
+
+        GameObject GetActiveTarget(Vehicle vehicle)
+        {
+            // Get the GameObject we're looking at
+            var activeTarget = default(GameObject);
+            Targeting.GetTarget(vehicle.gameObject, 6f, out activeTarget, out float dist, null);
+
+            // Check if not null
+            if (activeTarget != null)
+            {
+                // Get the root object, or the hit object if root is null
+                var root = UWE.Utils.GetEntityRoot(activeTarget) ?? activeTarget;
+                if (root.GetComponentProfiled<Pickupable>())
+                    activeTarget = root;                 
+                else
+                    root = null;
+            }
+
+            // Get the GUIHand component
+            var guiHand = Player.main.GetComponent<GUIHand>();
+            if (activeTarget)
+            {
+                // Send the Hover message to the GameObject we're looking at.
+                GUIHand.Send(activeTarget, HandTargetEventType.Hover, guiHand);
+            }
+
+            return activeTarget;
         }
     }
 }
