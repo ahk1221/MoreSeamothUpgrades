@@ -12,7 +12,7 @@ namespace MoreSeamothUpgrades.Modules
                 "Enables the Seamoth to pick up resources like the PRAWN Claw Arm.",
                 CraftTree.Type.SeamothUpgrades,
                 new string[1] { "SeamothModules" },
-                TechType.Exosuit,
+                TechType.ExosuitClawArmModule,
                 TechType.ExosuitClawArmModule)
         {
             SeamothClawModule = TechType;
