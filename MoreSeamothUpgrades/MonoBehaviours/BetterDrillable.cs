@@ -144,7 +144,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             }
             else
             {
-                HandReticle.main.SetInteractInfo(primaryTooltip, "NeedExoToMine");
+                HandReticle.main.SetInteractText(primaryTooltip, "NeedExoToMine");
             }
         }
 
