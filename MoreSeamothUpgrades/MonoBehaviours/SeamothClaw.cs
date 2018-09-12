@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Reflection;
 using System;
 using MoreSeamothUpgrades.Patches;
 
@@ -17,11 +18,28 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         public FMODAsset hitFishSound;
         public FMODAsset pickupSound;
         public Transform front;
-        public VFXEventTypes vfxEventType;
         public VFXController fxControl;
+        
+        private static MethodInfo GetArmPrefabMethod =
+            typeof(Exosuit).GetMethod("GetArmPrefab", BindingFlags.NonPublic | BindingFlags.Instance);
+
         private bool shownNoRoomNotification;
 
         private SeaMoth seamoth;
+
+        public void Awake()
+        {
+            var exosuitPrefab = Resources.Load<GameObject>("WorldEntities/Tools/Exosuit").GetComponent<Exosuit>();
+
+            var exosuitClawArmGO = (GameObject)GetArmPrefabMethod.Invoke(exosuitPrefab, new object[] { TechType.ExosuitClawArmModule });
+            var exosuitClawArm = exosuitClawArmGO.GetComponent<ExosuitClawArm>();
+            animator = exosuitClawArm.animator;
+            hitTerrainSound = exosuitClawArm.hitTerrainSound;
+            hitFishSound = exosuitClawArm.hitFishSound;
+            pickupSound = exosuitClawArm.pickupSound;
+            front = exosuitClawArm.front;
+            fxControl = exosuitClawArm.fxControl;
+        }
 
         void Start()
         {
@@ -48,7 +66,6 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 if (Time.time > this.cooldownTime)
                 {
                     // Try Use!
-                    Console.WriteLine("[MoreSeamothUpgrades] Claw cooldown ok. Trying Use!");
                     TryUse();
                 }
             }
@@ -96,8 +113,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         {
             Pickupable pickupable = null;
             PickPrefab component = null;
-
-            Console.WriteLine("[MoreSeamothUpgrades] Claw getting hit object.");
+            
             var pos = Vector3.zero;
             var hitObject = default(GameObject);
 
@@ -105,48 +121,31 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
             if (hitObject)
             {
-                Console.WriteLine("[MoreSeamothUpgrades] Claw hit object is not null.");
-
                 pickupable = hitObject.FindAncestor<Pickupable>();
                 component = hitObject.FindAncestor<PickPrefab>();
             }
             if (pickupable != null && pickupable.isPickupable)
             {
-                Console.WriteLine("[MoreSeamothUpgrades] Claw pickupable is not null and is pickupable.");
                 if (GetStorageContainer(pickupable).HasRoomFor(pickupable))
                 {
-                    //this.animator.SetTrigger("use_tool");
+                    this.animator.SetTrigger("use_tool");
                     this.shownNoRoomNotification = false;
                     OnPickup(pickupable, component);
                 }
-                else
-                {
-                    Console.WriteLine("[MoreSeamothUpgrades] Storage container room check failure.");
-                }
                 if (!this.shownNoRoomNotification)
                 {
-                    ErrorMessage.AddMessage(Language.main.Get("ContainerCantFit"));
                     this.shownNoRoomNotification = true;
                 }
             }
             else
             {
-                Console.WriteLine("[MoreSeamothUpgrades] Claw pickupable was null.");
                 if (component != null)
                 {
-                    Console.WriteLine("[MoreSeamothUpgrades] Claw component is not null.");
-                    //this.animator.SetTrigger("use_tool");
+                    this.animator.SetTrigger("use_tool");
                     OnPickup(pickupable, component);
                 }
-                else
-                {
-                    Console.WriteLine("[MoreSeamothUpgrades] Claw component was also null.");
-                }
-                //Console.WriteLine("[MoreSeamothUpgrades] Claw setting bash animator trigger.");
-                //this.animator.SetTrigger("bash");
-                //Console.WriteLine("[MoreSeamothUpgrades] Claw playing fxControl.");
-                //this.fxControl.Play(0);
-                Console.WriteLine("[MoreSeamothUpgrades] Claw OnHit().");
+                this.animator.SetTrigger("bash");
+                this.fxControl.Play(0);
                 OnHit();
             }
         }
@@ -158,7 +157,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 pickupable = pickupable.Initialize();
                 InventoryItem item = new InventoryItem(pickupable);
                 GetStorageContainer(pickupable).UnsafeAdd(item);
-                global::Utils.PlayFMODAsset(this.pickupSound, this.front, 5f);
+                global::Utils.PlayFMODAsset(pickupSound, this.front, 5f);
             }
             else if (component != null && component.AddToContainer(GetStorageContainer(pickupable)))
             {
@@ -190,15 +189,15 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                     {
                         bool flag = liveMixin.IsAlive();
                         liveMixin.TakeDamage(50f, position, DamageType.Normal, null);
-                        //global::Utils.PlayFMODAsset(this.hitFishSound, this.front, 50f);
+                        global::Utils.PlayFMODAsset(hitFishSound, this.front, 5f);
                     }
                     else
                     {
-                        //global::Utils.PlayFMODAsset(this.hitTerrainSound, this.front, 50f);
+                        global::Utils.PlayFMODAsset(hitTerrainSound, this.front, 5f);
                     }
                     VFXSurface component2 = gameObject.GetComponent<VFXSurface>();
                     Vector3 euler = MainCameraControl.main.transform.eulerAngles + new Vector3(300f, 90f, 0f);
-                    //VFXSurfaceTypeManager.main.Play(component2, this.vfxEventType, position, Quaternion.Euler(euler), seamoth.gameObject.transform);
+                    VFXSurfaceTypeManager.main.Play(component2, VFXEventTypes.impact, position, Quaternion.Euler(euler), seamoth.gameObject.transform);
                     gameObject.SendMessage("BashHit", this, SendMessageOptions.DontRequireReceiver);
                 }
             }
