@@ -402,7 +402,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             {
                 var seamoth = (SeaMoth)veh;
 
-                for(int i = 0; i < 4; i++)
+                for(int i = 0; i < 9; i++)
                 {
                     var storage = seamoth.GetStorageInSlot(i, TechType.VehicleStorageModule);
                     if (storage != null && storage.HasRoomFor(pickupable))
