@@ -29,10 +29,9 @@ namespace MoreSeamothUpgrades.Patches
                     // Set its toggle!
                     seamothClawModule.toggle = active;
                 }
-            }
-
-            // If its the SeamothDrillModule
-            if (techType == SeamothModule.SeamothDrillModule)
+            } 
+			// If its the SeamothDrillModule
+			else if (techType == SeamothModule.SeamothDrillModule) 
             {
                 // Get the SeamothDrill component from the SeaMoth object.
                 var seamothDrillModule = __instance.GetComponent<SeamothDrill>();
