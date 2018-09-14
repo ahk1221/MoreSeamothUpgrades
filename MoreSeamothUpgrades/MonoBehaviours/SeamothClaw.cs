@@ -99,7 +99,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
         public ItemsContainer GetStorageContainer(Pickupable pickupable)
         {
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 4; i++)
             {
                 var storage = seamoth.GetStorageInSlot(i, TechType.VehicleStorageModule);
                 if (storage != null && storage.HasRoomFor(pickupable))
