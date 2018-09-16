@@ -13,6 +13,7 @@ namespace MoreSeamothUpgrades
     {
         public static TechType SeamothHullModule4 { get; protected set; }
         public static TechType SeamothHullModule5 { get; protected set; }
+        public static TechType SeamothClawModule { get; protected set; }
         public static TechType SeamothDrillModule { get; protected set; }
         public static TechType SeamothThermalModule { get; protected set; }
 

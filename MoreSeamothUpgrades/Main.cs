@@ -35,6 +35,7 @@ namespace MoreSeamothUpgrades
 
                 PrefabHandler.RegisterPrefab(new SeamothHullModule4());
                 PrefabHandler.RegisterPrefab(new SeamothHullModule5());
+                PrefabHandler.RegisterPrefab(new SeamothClawModule());
                 PrefabHandler.RegisterPrefab(new SeamothDrillModule());
                 PrefabHandler.RegisterPrefab(new SeamothThermalModule());
 

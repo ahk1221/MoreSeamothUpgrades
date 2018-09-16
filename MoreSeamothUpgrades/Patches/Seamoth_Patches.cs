@@ -17,14 +17,27 @@ namespace MoreSeamothUpgrades.Patches
             // slotID is 0-based, so an addition of 1 is required.
             var techType = __instance.modules.GetTechTypeInSlot($"SeamothModule{slotID + 1}");
 
-            // If its the SeamothDrillModule
-            if (techType == SeamothModule.SeamothDrillModule)
-            { 
+            // If its the SeamothClawModule
+            if (techType == SeamothModule.SeamothClawModule)
+            {
+                // Get the SeamothClaw component from the SeaMoth object.
+                var seamothClawModule = __instance.GetComponent<SeamothClaw>();
+
+                // If its not null
+                if (seamothClawModule != null)
+                {
+                    // Set its toggle!
+                    seamothClawModule.toggle = active;
+                }
+            } 
+			// If its the SeamothDrillModule
+			else if (techType == SeamothModule.SeamothDrillModule) 
+            {
                 // Get the SeamothDrill component from the SeaMoth object.
                 var seamothDrillModule = __instance.GetComponent<SeamothDrill>();
 
                 // If its not null
-                if(seamothDrillModule != null)
+                if (seamothDrillModule != null)
                 {
                     // Set its toggle!
                     seamothDrillModule.toggle = active;
@@ -39,6 +52,9 @@ namespace MoreSeamothUpgrades.Patches
     {
         static void Prefix(SeaMoth __instance)
         {
+            // Add the SeamothClaw component to the Seamoth on start.
+            __instance.gameObject.AddComponent<SeamothClaw>();
+
             // Add the SeamothDrill component to the Seamoth on start.
             __instance.gameObject.AddComponent<SeamothDrill>();
 
