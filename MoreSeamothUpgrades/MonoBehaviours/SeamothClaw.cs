@@ -23,8 +23,6 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         private static MethodInfo GetArmPrefabMethod =
             typeof(Exosuit).GetMethod("GetArmPrefab", BindingFlags.NonPublic | BindingFlags.Instance);
 
-        private bool shownNoRoomNotification;
-
         private SeaMoth seamoth;
 
         public void Awake()
@@ -126,15 +124,14 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             }
             if (pickupable != null && pickupable.isPickupable)
             {
-                if (GetStorageContainer(pickupable).HasRoomFor(pickupable))
+                if (GetStorageContainer(pickupable) != null)
                 {
                     this.animator.SetTrigger("use_tool");
-                    this.shownNoRoomNotification = false;
                     OnPickup(pickupable, component);
                 }
-                if (!this.shownNoRoomNotification)
+                else
                 {
-                    this.shownNoRoomNotification = true;
+                    ErrorMessage.AddMessage(Language.main.Get("ContainerCantFit"));
                 }
             }
             else
