@@ -4,6 +4,7 @@ using SMLHelper.V2.Handlers;
 using Harmony;
 using System;
 using MoreSeamothUpgrades.Modules;
+using System.IO;
 
 namespace MoreSeamothUpgrades
 {
@@ -12,6 +13,7 @@ namespace MoreSeamothUpgrades
         public static AnimationCurve ExosuitThermalReactorCharge;
         public static FMOD_CustomLoopingEmitter DrillLoop;
         public static FMOD_CustomLoopingEmitter DrillLoopHit;
+        public static float DrillNodeHealth = 200f;
 
         private static MethodInfo GetArmPrefabMethod =
             typeof(Exosuit).GetMethod("GetArmPrefab", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -32,6 +34,17 @@ namespace MoreSeamothUpgrades
                 var exosuitDrillArm = exosuitDrillArmGO.GetComponent<ExosuitDrillArm>();
                 DrillLoopHit = exosuitDrillArm.loopHit;
                 DrillLoop = exosuitDrillArm.loop;
+
+                var path = @"./QMods/QuickMiner/mod.json";
+                if (!File.Exists(path))
+                {
+                    Console.WriteLine("[MoreSeamothUpgrades] Quick Miner not installed; node health set to default");
+                }
+                else
+                {
+                    Console.WriteLine("[MoreSeamothUpgrades] Quick Miner IS installed; node health quartered");
+                    DrillNodeHealth = 50f;
+                }
 
                 PrefabHandler.RegisterPrefab(new SeamothHullModule4());
                 PrefabHandler.RegisterPrefab(new SeamothHullModule5());

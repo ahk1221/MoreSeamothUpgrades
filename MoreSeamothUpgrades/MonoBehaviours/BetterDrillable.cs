@@ -65,7 +65,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 health = new float[renderers.Length];
                 for (int i = 0; i < health.Length; i++)
                 {
-                    health[i] = 200f;
+                    health[i] = Main.DrillNodeHealth;
                 }
             }
             else
@@ -82,7 +82,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                         }
                         else
                         {
-                            health[j] = 200f;
+                            health[j] = Main.DrillNodeHealth;
                         }
                     }
                 }
@@ -167,7 +167,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         {
             for (int i = 0; i < health.Length; i++)
             {
-                health[i] = 200f;
+                health[i] = Main.DrillNodeHealth;
                 renderers[i].gameObject.SetActive(true);
             }
         }
