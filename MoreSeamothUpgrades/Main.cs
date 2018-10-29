@@ -5,6 +5,7 @@ using Harmony;
 using System;
 using MoreSeamothUpgrades.Modules;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MoreSeamothUpgrades
 {
@@ -42,8 +43,30 @@ namespace MoreSeamothUpgrades
                 }
                 else
                 {
-                    Console.WriteLine("[MoreSeamothUpgrades] Quick Miner IS installed; node health quartered");
-                    DrillNodeHealth = 50f;
+                    Console.WriteLine("[MoreSeamothUpgrades] Quick Miner IS installed; reading config...");
+                    var qmConfigJson = File.ReadAllText(path);
+                    string nodeHealthPattern = "\"NodeHealth\"\\s*:\\s*(\\d+\\.?\\d*)";
+                    Match match = Regex.Match(qmConfigJson, nodeHealthPattern);
+                    if (match.Success)
+                    {
+                        GroupCollection iAmGroup = match.Groups;
+                        float qmNodeHealth = 0;
+                        if (float.TryParse(iAmGroup[1].Value, out qmNodeHealth))
+                        {
+                            Console.WriteLine("[MoreSeamothUpgrades] New node health is " + qmNodeHealth + ", based on QM config.");
+                            DrillNodeHealth = qmNodeHealth;
+                        }
+                        else
+                        {
+                            Console.WriteLine("[MoreSeamothUpgrades] Read QM config, but couldn't get the value! Using the default value of 50.");
+                            DrillNodeHealth = 50f;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("[MoreSeamothUpgrades] Couldn't find the node health config! Using the default value of 50.");
+                        DrillNodeHealth = 50f;
+                    }
                 }
 
                 PrefabHandler.RegisterPrefab(new SeamothHullModule4());
