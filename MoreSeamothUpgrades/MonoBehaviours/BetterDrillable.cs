@@ -215,6 +215,8 @@ namespace MoreSeamothUpgrades.MonoBehaviours
 
         public void DestroySelf()
         {
+            // https://github.com/Vlad-00003/SubnauticaMods/blob/master/LargeDepositsFix/Drillable_DestroySelf_Patch.cs
+            base.SendMessage("OnBreakResource",null, SendMessageOptions.DontRequireReceiver);
             UnityEngine.Object.Destroy(gameObject);
         }
 
