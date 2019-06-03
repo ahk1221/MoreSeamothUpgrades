@@ -31,7 +31,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             if (!toggle) return;
 
             // Some checks to see if we can drill or not.
-            if (seamoth.modules.GetCount(Main.SeamothDrillModule) <= 0) return;
+            if (seamoth.modules.GetCount(SeamothModule.SeamothDrillModule) <= 0) return;
             if (!seamoth.GetPilotingMode()) return;
             if (Player.main.GetPDA().isOpen) return;
 
@@ -113,7 +113,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                     // Send the "drill" message to the Drillable
                     drillable.OnDrill(transform.position, moth, out GameObject hitMesh);
                 }
-                else // Otherwise if we did not hit any object
+                else // Otherwise if we did not hit a drillable object
                 {
                     // Get the LiveMixin component in the found GameObject
                     LiveMixin liveMixin = hitObj.FindAncestor<LiveMixin>();

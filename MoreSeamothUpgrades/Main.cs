@@ -1,24 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Reflection;
+﻿using System.Reflection;
 using UnityEngine;
-using SMLHelper;
-using SMLHelper.Patchers;
+using SMLHelper.V2.Handlers;
 using Harmony;
-using MoreSeamothUpgrades.MonoBehaviours;
 using System;
+using MoreSeamothUpgrades.Modules;
+using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MoreSeamothUpgrades
 {
     public class Main
     {
-        public static TechType SeamothHullModule4;
-        public static TechType SeamothHullModule5;
-        public static TechType SeamothThermalModule;
-        public static TechType SeamothDrillModule;
-
         public static AnimationCurve ExosuitThermalReactorCharge;
         public static FMOD_CustomLoopingEmitter DrillLoop;
         public static FMOD_CustomLoopingEmitter DrillLoopHit;
+        public static float DrillNodeHealth = 200f;
 
         private static MethodInfo GetArmPrefabMethod =
             typeof(Exosuit).GetMethod("GetArmPrefab", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -27,16 +23,10 @@ namespace MoreSeamothUpgrades
         {
             try
             {
-                #region Patching
-
                 var harmony = HarmonyInstance.Create("com.ahk1221.moreseamothupgrades");
                 harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-                LanguagePatcher.customLines.Add("Tooltip_VehicleHullModule3", "Enhances diving depth. Does not stack"); // To update conflicts about the maximity.
-
-                #endregion
-
-                #region Extract From Exosuit
+                LanguageHandler.SetLanguageLine("Tooltip_VehicleHullModule3", "Enhances diving depth. Does not stack"); // To update conflicts about the maximity.
 
                 var exosuit = Resources.Load<GameObject>("WorldEntities/Tools/Exosuit").GetComponent<Exosuit>();
                 ExosuitThermalReactorCharge = exosuit.thermalReactorCharge;
@@ -46,139 +36,44 @@ namespace MoreSeamothUpgrades
                 DrillLoopHit = exosuitDrillArm.loopHit;
                 DrillLoop = exosuitDrillArm.loop;
 
-                #endregion
-
-                #region Add TechTypes
-
-                SeamothHullModule4 = TechTypePatcher.AddTechType("SeamothHullModule4", "Seamoth depth module MK4", "Enhances diving depth. Does not stack.");
-                SeamothHullModule5 = TechTypePatcher.AddTechType("SeamothHullModule5", "Seamoth depth module MK5", "Enhances diving depth to maximum. Does not stack.");
-                SeamothThermalModule = TechTypePatcher.AddTechType("SeamothThermalModule", "Seamoth thermal reactor", "Recharges power cells in hot areas. Doesn't stack.");
-                SeamothDrillModule = TechTypePatcher.AddTechType("SeamothDrillModule", "Seamoth drill module", "Enables the Seamoth to mine resources like the PRAWN Drill Arm.");
-
-                #endregion
-
-                #region Add Recipes
-
-                var seamothHullModule4Recipe = new TechDataHelper()
+                var path = @"./QMods/QuickMiner/mod.json";
+                if (!File.Exists(path))
                 {
-                    _techType = SeamothHullModule4,
-                    _ingredients = new List<IngredientHelper>()
-                {
-                    new IngredientHelper(TechType.VehicleHullModule3, 1),
-                    new IngredientHelper(TechType.PlasteelIngot, 1),
-                    new IngredientHelper(TechType.Nickel, 2),
-                    new IngredientHelper(TechType.AluminumOxide, 3)
-                },
-                    _craftAmount = 1
-                };
-
-                var seamothHullModule5Recipe = new TechDataHelper()
-                {
-                    _techType = SeamothHullModule5,
-                    _ingredients = new List<IngredientHelper>()
-                {
-                    new IngredientHelper(SeamothHullModule4, 1),
-                    new IngredientHelper(TechType.Titanium, 5),
-                    new IngredientHelper(TechType.Lithium, 2),
-                    new IngredientHelper(TechType.Kyanite, 3)
-                },
-                    _craftAmount = 1
-                };
-
-                var seamothThermalModuleRecipe = new TechDataHelper()
-                {
-                    _techType = SeamothThermalModule,
-                    _craftAmount = 1,
-                    _ingredients = new List<IngredientHelper>()
-                {
-                    new IngredientHelper(TechType.Kyanite, 1),
-                    new IngredientHelper(TechType.Polyaniline, 2),
-                    new IngredientHelper(TechType.WiringKit, 1)
+                    Console.WriteLine("[MoreSeamothUpgrades] Quick Miner not installed; node health set to default");
                 }
-                };
-
-                var seamothDrillModuleRecipe = new TechDataHelper()
+                else
                 {
-                    _techType = SeamothDrillModule,
-                    _craftAmount = 1,
-                    _ingredients = new List<IngredientHelper>()
-                {
-                    new IngredientHelper(TechType.ExosuitDrillArmModule, 1),
-                    new IngredientHelper(TechType.Diamond, 2),
-                    new IngredientHelper(TechType.Titanium, 2)
+                    Console.WriteLine("[MoreSeamothUpgrades] Quick Miner IS installed; reading config...");
+                    var qmConfigJson = File.ReadAllText(path);
+                    string nodeHealthPattern = "\"NodeHealth\"\\s*:\\s*(\\d+\\.?\\d*)";
+                    Match match = Regex.Match(qmConfigJson, nodeHealthPattern);
+                    if (match.Success)
+                    {
+                        GroupCollection iAmGroup = match.Groups;
+                        float qmNodeHealth = 0;
+                        if (float.TryParse(iAmGroup[1].Value, out qmNodeHealth))
+                        {
+                            Console.WriteLine("[MoreSeamothUpgrades] New node health is " + qmNodeHealth + ", based on QM config.");
+                            DrillNodeHealth = qmNodeHealth;
+                        }
+                        else
+                        {
+                            Console.WriteLine("[MoreSeamothUpgrades] Read QM config, but couldn't get the value! Using the default value of 50.");
+                            DrillNodeHealth = 50f;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("[MoreSeamothUpgrades] Couldn't find the node health config! Using the default value of 50.");
+                        DrillNodeHealth = 50f;
+                    }
                 }
-                };
 
-                CraftDataPatcher.customTechData[SeamothHullModule4] = seamothHullModule4Recipe;
-                CraftDataPatcher.customTechData[SeamothHullModule5] = seamothHullModule5Recipe;
-                CraftDataPatcher.customTechData[SeamothThermalModule] = seamothThermalModuleRecipe;
-                CraftDataPatcher.customTechData[SeamothDrillModule] = seamothDrillModuleRecipe;
-
-                CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothHullModule4, CraftTree.Type.Workbench, "SeamothMenu/SeamothHullModule4"));
-                CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothHullModule5, CraftTree.Type.Workbench, "SeamothMenu/SeamothHullModule5"));
-                CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothThermalModule, CraftTree.Type.SeamothUpgrades, "SeamothModules/SeamothThermalModule"));
-                CraftTreePatcher.customNodes.Add(new CustomCraftNode(SeamothDrillModule, CraftTree.Type.SeamothUpgrades, "SeamothModules/SeamothDrillModule"));
-
-                #endregion
-
-                #region Equipment Types
-
-                CraftDataPatcher.customEquipmentTypes[SeamothHullModule4] = EquipmentType.SeamothModule;
-                CraftDataPatcher.customEquipmentTypes[SeamothHullModule5] = EquipmentType.SeamothModule;
-                CraftDataPatcher.customEquipmentTypes[SeamothThermalModule] = EquipmentType.SeamothModule;
-                CraftDataPatcher.customEquipmentTypes[SeamothDrillModule] = EquipmentType.SeamothModule;
-
-                //TODO: SMLHelper: Add CraftDataPatcher.customSlotTypes.
-                var slotTypes = (Dictionary<TechType, QuickSlotType>)typeof(CraftData).GetField("slotTypes", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
-                slotTypes[SeamothDrillModule] = QuickSlotType.Selectable;
-
-                #endregion
-
-                #region Add Prefabs
-
-                  CustomPrefabHandler.customPrefabs.Add(new CustomPrefab(
-                    "SeamothHullModule4",
-                    "WorldEntities/Tools/SeamothHullModule4",
-                    SeamothHullModule4,
-                    GetSeamothHullModuleIV));
-
-                CustomPrefabHandler.customPrefabs.Add(new CustomPrefab(
-                    "SeamothHullModule5",
-                    "WorldEntities/Tools/SeamothHullModule5",
-                    SeamothHullModule5,
-                    GetSeamothHullModuleV));
-
-                CustomPrefabHandler.customPrefabs.Add(new CustomPrefab(
-                    "SeamothThermalModule",
-                    "WorldEntities/Tools/SeamothThermalModule",
-                    SeamothThermalModule,
-                    GetSeamothThermalModule));
-
-                CustomPrefabHandler.customPrefabs.Add(new CustomPrefab(
-                    "SeamothDrillModule",
-                    "WorldEntities/Tools/SeamothDrillModule",
-                    SeamothDrillModule,
-                    GetSeamothDrillModule));
-
-                #endregion
-
-                #region Add Sprites
-
-                var depthSprite = SpriteManager.Get(TechType.VehicleHullModule3);
-
-                CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothHullModule4, depthSprite));
-                CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothHullModule5, depthSprite));
-
-                var thermalReactorSprite = SpriteManager.Get(TechType.ExosuitThermalReactorModule);
-
-                CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothThermalModule, thermalReactorSprite));
-
-                var assetBundle = AssetBundle.LoadFromFile(@"./QMods/MoreSeamothUpgrades/moreseamothupgrades.assets");
-                var drillSprite = assetBundle.LoadAsset<Sprite>("SeamothDrill");
-
-                CustomSpriteHandler.customSprites.Add(new CustomSprite(SeamothDrillModule, drillSprite));
-
-                #endregion
+                PrefabHandler.RegisterPrefab(new SeamothHullModule4());
+                PrefabHandler.RegisterPrefab(new SeamothHullModule5());
+                PrefabHandler.RegisterPrefab(new SeamothClawModule());
+                PrefabHandler.RegisterPrefab(new SeamothDrillModule());
+                PrefabHandler.RegisterPrefab(new SeamothThermalModule());
 
                 Console.WriteLine("[MoreSeamothUpgrades] Succesfully patched!");
             }
@@ -187,45 +82,6 @@ namespace MoreSeamothUpgrades
                 Console.WriteLine("[MoreSeamothUpgrades] Caught exception! " + e.InnerException.Message);
                 Console.WriteLine(e.InnerException.StackTrace);
             }
-
-        }
-
-        public static GameObject GetSeamothDrillModule()
-        {
-            return GetSeamothUpgrade(SeamothDrillModule, "SeamothDrillModule").AddComponent<SeamothDrill>().gameObject;
-        }
-
-        public static GameObject GetSeamothThermalModule()
-        {
-            return GetSeamothUpgrade(SeamothThermalModule, "SeamothThermalModule");
-        }
-
-        public static GameObject GetSeamothHullModuleIV()
-        {
-            return GetSeamothUpgrade(SeamothHullModule4, "SeamothHullModule4");
-        }
-
-        public static GameObject GetSeamothHullModuleV()
-        {
-            return GetSeamothUpgrade(SeamothHullModule5, "SeamothHullModule5");
-        }
-
-        public static GameObject GetSeamothUpgrade(TechType techType, string classId)
-        {
-            // Get the ElectricalDefense module prefab and instantiate it
-            var path = "WorldEntities/Tools/SeamothElectricalDefense";
-            var prefab = Resources.Load<GameObject>(path);
-            var obj = GameObject.Instantiate(prefab);
-
-            // Get the TechTags and PrefabIdentifiers
-            var techTag = obj.GetComponent<TechTag>();
-            var prefabIdentifier = obj.GetComponent<PrefabIdentifier>();
-
-            // Change them so they fit to our requirements.
-            techTag.type = techType;
-            prefabIdentifier.ClassId = classId;
-
-            return obj;
         }
     }
 }

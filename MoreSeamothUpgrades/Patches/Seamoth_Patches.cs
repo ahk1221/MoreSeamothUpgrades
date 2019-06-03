@@ -6,18 +6,6 @@ using UnityEngine;
 
 namespace MoreSeamothUpgrades.Patches
 {
-    public class SeamothUtility
-    {
-        // Copy-paste of SeaMoth._slotIDs.
-        public static readonly string[] slotIDs = new string[]
-        {
-            "SeamothModule1",
-            "SeamothModule2",
-            "SeamothModule3",
-            "SeamothModule4"
-        };
-    }
-
     [HarmonyPatch(typeof(SeaMoth))]
     [HarmonyPatch("OnUpgradeModuleToggle")]
     public class Seamoth_OnUpgradeModuleToggle_Patch
@@ -25,16 +13,31 @@ namespace MoreSeamothUpgrades.Patches
         static void Postfix(SeaMoth __instance, int slotID, bool active)
         {
             // Find the TechType in the toggled slot.
-            var techType = __instance.modules.GetTechTypeInSlot(SeamothUtility.slotIDs[slotID]);
+            // Valid inputs would be along the lines of: SeamothModule1, SeamothModule2, etc
+            // slotID is 0-based, so an addition of 1 is required.
+            var techType = __instance.modules.GetTechTypeInSlot($"SeamothModule{slotID + 1}");
 
-            // If its the SeamothDrillModule
-            if (techType == Main.SeamothDrillModule)
-            { 
+            // If its the SeamothClawModule
+            if (techType == SeamothModule.SeamothClawModule)
+            {
+                // Get the SeamothClaw component from the SeaMoth object.
+                var seamothClawModule = __instance.GetComponent<SeamothClaw>();
+
+                // If its not null
+                if (seamothClawModule != null)
+                {
+                    // Set its toggle!
+                    seamothClawModule.toggle = active;
+                }
+            } 
+			// If its the SeamothDrillModule
+			else if (techType == SeamothModule.SeamothDrillModule) 
+            {
                 // Get the SeamothDrill component from the SeaMoth object.
                 var seamothDrillModule = __instance.GetComponent<SeamothDrill>();
 
                 // If its not null
-                if(seamothDrillModule != null)
+                if (seamothDrillModule != null)
                 {
                     // Set its toggle!
                     seamothDrillModule.toggle = active;
@@ -49,6 +52,9 @@ namespace MoreSeamothUpgrades.Patches
     {
         static void Prefix(SeaMoth __instance)
         {
+            // Add the SeamothClaw component to the Seamoth on start.
+            __instance.gameObject.AddComponent<SeamothClaw>();
+
             // Add the SeamothDrill component to the Seamoth on start.
             __instance.gameObject.AddComponent<SeamothDrill>();
 
@@ -75,7 +81,7 @@ namespace MoreSeamothUpgrades.Patches
         static void Prefix(SeaMoth __instance)
         {
             // If we have the SeamothThermalModule equipped.
-            var count = __instance.modules.GetCount(Main.SeamothThermalModule);
+            var count = __instance.modules.GetCount(SeamothModule.SeamothThermalModule);
             if (count > 0)
             {
                 // Evaluate the energy to add based on temperature
@@ -83,7 +89,7 @@ namespace MoreSeamothUpgrades.Patches
                 var energyToAdd = Main.ExosuitThermalReactorCharge.Evaluate(temperature);
 
                 // Add the energy by invoking private method using Reflection.
-                AddEnergyMethod.Invoke(__instance, new object[] { energyToAdd * UnityEngine.Time.deltaTime });
+                AddEnergyMethod.Invoke(__instance, new object[] { energyToAdd * Time.deltaTime });
             }
         }
     }
@@ -114,11 +120,11 @@ namespace MoreSeamothUpgrades.Patches
                     700f
                 },
                 {
-                    Main.SeamothHullModule4,
+                    SeamothModule.SeamothHullModule4,
                     1100f
                 },
                 {
-                    Main.SeamothHullModule5,
+                    SeamothModule.SeamothHullModule5,
                     1500f
                 }
             };
@@ -126,24 +132,20 @@ namespace MoreSeamothUpgrades.Patches
             // Depth upgrade to add.
             var depthUpgrade = 0f;
 
-            // Loop through all slots.
-            for (int i = 0; i < SeamothUtility.slotIDs.Length; i++)
+            // Loop through available depth module upgrades
+            foreach (var entry in dictionary)
             {
-                // Get the slot and the TechType
-                var slot = SeamothUtility.slotIDs[i];
-                var techTypeInSlot = __instance.modules.GetTechTypeInSlot(slot);
+                TechType depthTechType = entry.Key;
+                float depthAddition = entry.Value;
 
-                // If its one of the depth modules
-                if (dictionary.ContainsKey(techTypeInSlot))
+                int count = __instance.modules.GetCount(depthTechType);
+
+                // If you have at least 1 such depth module
+                if(count > 0)
                 {
-                    // Get the depth upgrade for that TechType
-                    var currentIteration = dictionary[techTypeInSlot];
-
-                    // If the upgrade is more than the one currently selected
-                    if (currentIteration > depthUpgrade)
+                    if(depthAddition > depthUpgrade)
                     {
-                        // Select this one!
-                        depthUpgrade = currentIteration;
+                        depthUpgrade = depthAddition;
                     }
                 }
             }

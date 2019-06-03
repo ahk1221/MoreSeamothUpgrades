@@ -65,7 +65,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                 health = new float[renderers.Length];
                 for (int i = 0; i < health.Length; i++)
                 {
-                    health[i] = 200f;
+                    health[i] = Main.DrillNodeHealth;
                 }
             }
             else
@@ -82,7 +82,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
                         }
                         else
                         {
-                            health[j] = 200f;
+                            health[j] = Main.DrillNodeHealth;
                         }
                     }
                 }
@@ -126,7 +126,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             else if(vehicle.GetType().Equals(typeof(SeaMoth)))
             {
                 var seamoth = (SeaMoth)vehicle;
-                if (seamoth.modules.GetCount(Main.SeamothDrillModule) > 0)
+                if (seamoth.modules.GetCount(SeamothModule.SeamothDrillModule) > 0)
                 {
                     canDrill = true;
                     hand = HandReticle.Hand.Left;
@@ -144,7 +144,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
             }
             else
             {
-                HandReticle.main.SetInteractInfo(primaryTooltip, "NeedExoToMine");
+                HandReticle.main.SetInteractText(primaryTooltip, "NeedExoToMine");
             }
         }
 
@@ -167,7 +167,7 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         {
             for (int i = 0; i < health.Length; i++)
             {
-                health[i] = 200f;
+                health[i] = Main.DrillNodeHealth;
                 renderers[i].gameObject.SetActive(true);
             }
         }
@@ -241,6 +241,12 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         {
             if (resources.Length > 0)
             {
+                var def = this.GetComponent<Drillable>();
+                if (def != null)
+                {
+                    minResourcesToSpawn = def.minResourcesToSpawn;
+                    maxResourcesToSpawn = def.maxResourcesToSpawn;
+                }
                 int num = UnityEngine.Random.Range(minResourcesToSpawn, maxResourcesToSpawn);
                 for (int i = 0; i < num; i++)
                 {
