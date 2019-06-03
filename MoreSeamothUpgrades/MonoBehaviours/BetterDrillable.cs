@@ -241,6 +241,12 @@ namespace MoreSeamothUpgrades.MonoBehaviours
         {
             if (resources.Length > 0)
             {
+                var def = this.GetComponent<Drillable>();
+                if (def != null)
+                {
+                    minResourcesToSpawn = def.minResourcesToSpawn;
+                    maxResourcesToSpawn = def.maxResourcesToSpawn;
+                }
                 int num = UnityEngine.Random.Range(minResourcesToSpawn, maxResourcesToSpawn);
                 for (int i = 0; i < num; i++)
                 {
